@@ -337,12 +337,41 @@ SET(QRCODE_DIR
 
     )
 
-target_sources(qzxing PRIVATE
-    ${SOURCES}
-    ${AZTEC_DIR}
-    ${COMMON_DIR}
-    ${DATAMATRIX_DIR}
-    ${MULTI_DIR}
-    ${ONED_DIR}
-    ${PDF417_DIR}
-    ${QRCODE_DIR})
+target_sources(${PROJECT_NAME} PRIVATE ${SOURCES} ${COMMON_DIR} ${MULTI_DIR})
+
+option(QZXING_USE_DECODER_AZTEC "Enable Aztec decoder format" ON)
+if(QZXING_USE_DECODER_AZTEC)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE ENABLE_DECODER_AZTEC)
+	target_sources(${PROJECT_NAME} PRIVATE ${AZTEC_DIR})
+endif()
+
+option(QZXING_USE_DECODER_DATA_MATRIX "Enable Data Matrix decoder format" ON)
+if(QZXING_USE_DECODER_DATA_MATRIX)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE ENABLE_DECODER_DATA_MATRIX)
+	target_sources(${PROJECT_NAME} PRIVATE ${DATAMATRIX_DIR})
+endif()
+
+option(QZXING_USE_DECODER_1D_BARCODES "Enable 1D barcode decoder formats" ON)
+if(QZXING_USE_DECODER_1D_BARCODES)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE ENABLE_DECODER_1D_BARCODES)
+	target_sources(${PROJECT_NAME} PRIVATE ${ONED_DIR})
+endif()
+
+option(QZXING_USE_DECODER_PDF17 "Enable PDF417 decoder format" ON)
+if(QZXING_USE_DECODER_PDF17)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE ENABLE_DECODER_PDF17)
+    target_sources(${PROJECT_NAME} PRIVATE ${PDF417_DIR})
+endif()
+
+include(CMakeDependentOption)
+option(QZXING_USE_DECODER_QR_CODE "Enable QR code decoder format" ON)
+cmake_dependent_option(QZXING_USE_ENCODER_QR_CODE "Enable QR code encoder" ON "QZXING_USE_ENCODER" OFF)
+if(QZXING_USE_DECODER_QR_CODE OR QZXING_USE_ENCODER_QR_CODE)
+	if(QZXING_USE_DECODER_QR_CODE)
+		target_compile_definitions(${PROJECT_NAME} PRIVATE ENABLE_DECODER_QR_CODE)
+	endif()
+	if(QZXING_USE_ENCODER_QR_CODE)
+		target_compile_definitions(${PROJECT_NAME} PRIVATE ENABLE_ENCODER_QR_CODE)
+	endif()
+    target_sources(${PROJECT_NAME} PRIVATE ${QRCODE_DIR})
+endif()
